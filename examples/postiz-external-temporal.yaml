@@ -1,0 +1,26 @@
+# Example Postiz values using external Temporal
+#
+# Usage:
+#   helm install postiz-app oci://ghcr.io/gitroomhq/postiz-helmchart/charts/postiz-app \
+#     --values examples/postiz-external-temporal.yaml
+
+# REQUIRED: Temporal connection
+env:
+  # Configure to your Temporal deployment
+  TEMPORAL_ADDRESS: "temporal-frontend.temporal.svc.cluster.local:7233"
+
+  # Your other environment variables
+  FRONTEND_URL: "https://postiz.example.com"
+  NEXT_PUBLIC_BACKEND_URL: "https://api.postiz.example.com"
+  BACKEND_INTERNAL_URL: "http://postiz-app:3000"
+
+# Enable ingress if needed
+ingress:
+  enabled: true
+  className: "nginx"  # Change to your ingress controller
+  hosts:
+    - host: postiz.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 80

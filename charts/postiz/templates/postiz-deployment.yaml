@@ -4,6 +4,10 @@ metadata:
   name: {{ include "postiz.fullname" . }}
   labels:
     {{- include "postiz.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -49,6 +53,10 @@ spec:
                 name: {{ include "postiz.fullname" . }}-config
             - secretRef:
                 name: {{ include "postiz.fullname" . }}-secrets
+            {{- range .Values.extraSecrets }}
+            - secretRef:
+                name: {{ .name }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.extraContainers }}

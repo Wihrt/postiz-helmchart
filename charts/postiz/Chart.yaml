@@ -1,9 +1,9 @@
 apiVersion: v2
 name: postiz-app
-description: A Social Media Scheduling App
+description: A Social Media Scheduling App (requires external Temporal service)
 type: application
-version: 1.0.5
-appVersion: "1.3.0"
+version: 1.1.0
+appVersion: "v2.13.0"
 maintainers:
   - name: jonathan-irvin
     email: offendingcommit@gmail.com
@@ -16,16 +16,18 @@ keywords:
   - marketing
   - scheduling
   - queue
+  - workflow
 home: https://postiz.com
 sources:
   - https://github.com/gitroomhq/postiz-app
   - https://github.com/gitroomhq/postiz-helmchart
 dependencies:
   - name: postgresql
-    version: 15.5.28
+    version: 18.2.3
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
-  - name: redis
-    version: 20.1.0
+  - name: valkey
+    version: 5.1.4
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
+    alias: redis
