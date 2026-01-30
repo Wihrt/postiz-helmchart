@@ -109,36 +109,36 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the Postiz chart and their default values.
 
-| Parameter                     | Description                          | Default        |
-| ----------------------------- | ------------------------------------ | -------------- |
-| `replicaCount`                | Number of replicas                   | `1`            |
-| `fullnameOverride`            | Override release name (affects all service hostnames) | `""`       |
-| `image.repository`            | Image repository                     | `ghcr.io/gitroomhq/postiz-app` |
-| `image.pullPolicy`            | Image pull policy                    | `IfNotPresent` |
-| `image.tag`                   | Image tag (empty defaults to appVersion v2.13.0) | `""`           |
-| `env.TEMPORAL_ADDRESS`        | **REQUIRED**: Temporal frontend service address | `""`      |
-| `service.type`                | Kubernetes service type              | `ClusterIP`    |
-| `service.port`                | Kubernetes service port              | `80`           |
-| `postgresql.enabled`          | Deploy PostgreSQL                    | `true`         |
-| `postgresql.auth.username`    | PostgreSQL username                  | `postiz`       |
-| `postgresql.auth.password`    | PostgreSQL password                  | `postiz-password` |
-| `postgresql.auth.database`    | PostgreSQL database                  | `postiz`       |
-| `redis.enabled`               | Deploy Redis (Valkey)                | `true`         |
-| `redis.auth.password`         | Redis/Valkey password                | `postiz-redis-password` |
-| `secrets.autoGenerate.enabled`| Auto-generate connection strings     | `true`         |
-| `secrets.autoGenerate.database`| Auto-generate DATABASE_URL          | `true`         |
-| `secrets.autoGenerate.redis`  | Auto-generate REDIS_URL              | `true`         |
-| `extraSecrets`                | Additional external secrets to inject| `[]`           |
-| `podAnnotations`              | Pod template annotations             | `{}`           |
-| `deploymentAnnotations`       | Deployment resource annotations      | `{}`           |
-| `configMapAnnotations`        | ConfigMap resource annotations       | `{}`           |
-| `secretAnnotations`           | Secret resource annotations          | `{}`           |
-| `serviceAnnotations`          | Service resource annotations         | `{}`           |
-| `ingress.enabled`             | Enable ingress controller resource   | `false`        |
-| `ingress.className`           | IngressClass that will be used       | `""`           |
-| `ingress.annotations`         | Ingress annotations                  | `{}`           |
-| `ingress.hosts`               | Ingress hostnames                    | `[]`           |
-| `ingress.tls`                 | Ingress TLS configuration            | `[]`           |
+| Parameter                       | Description                                           | Default                        |
+| ------------------------------- | ----------------------------------------------------- | ------------------------------ |
+| `replicaCount`                  | Number of replicas                                    | `1`                            |
+| `fullnameOverride`              | Override release name (affects all service hostnames) | `""`                           |
+| `image.repository`              | Image repository                                      | `ghcr.io/gitroomhq/postiz-app` |
+| `image.pullPolicy`              | Image pull policy                                     | `IfNotPresent`                 |
+| `image.tag`                     | Image tag (empty defaults to appVersion v2.13.0)      | `""`                           |
+| `env.TEMPORAL_ADDRESS`          | **REQUIRED**: Temporal frontend service address       | `""`                           |
+| `service.type`                  | Kubernetes service type                               | `ClusterIP`                    |
+| `service.port`                  | Kubernetes service port                               | `80`                           |
+| `postgresql.enabled`            | Deploy PostgreSQL                                     | `true`                         |
+| `postgresql.auth.username`      | PostgreSQL username                                   | `postiz`                       |
+| `postgresql.auth.password`      | PostgreSQL password                                   | `postiz-password`              |
+| `postgresql.auth.database`      | PostgreSQL database                                   | `postiz`                       |
+| `redis.enabled`                 | Deploy Redis (Valkey)                                 | `true`                         |
+| `redis.auth.password`           | Redis/Valkey password                                 | `postiz-redis-password`        |
+| `secrets.autoGenerate.enabled`  | Auto-generate connection strings                      | `true`                         |
+| `secrets.autoGenerate.database` | Auto-generate DATABASE_URL                            | `true`                         |
+| `secrets.autoGenerate.redis`    | Auto-generate REDIS_URL                               | `true`                         |
+| `extraSecrets`                  | Additional external secrets to inject                 | `[]`                           |
+| `podAnnotations`                | Pod template annotations                              | `{}`                           |
+| `deploymentAnnotations`         | Deployment resource annotations                       | `{}`                           |
+| `configMapAnnotations`          | ConfigMap resource annotations                        | `{}`                           |
+| `secretAnnotations`             | Secret resource annotations                           | `{}`                           |
+| `serviceAnnotations`            | Service resource annotations                          | `{}`                           |
+| `ingress.enabled`               | Enable ingress controller resource                    | `false`                        |
+| `ingress.className`             | IngressClass that will be used                        | `""`                           |
+| `ingress.annotations`           | Ingress annotations                                   | `{}`                           |
+| `ingress.hosts`                 | Ingress hostnames                                     | `[]`                           |
+| `ingress.tls`                   | Ingress TLS configuration                             | `[]`                           |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
@@ -478,76 +478,6 @@ server:
     log:
       level: debug
 ```
-
-## Migration from v1.1.0 (Embedded Temporal)
-
-If you're upgrading from v1.1.0 which had embedded Temporal, follow these steps:
-
-### Step 1: Export Temporal Data (if needed)
-
-If you have workflows in the embedded Temporal instance that you want to preserve:
-
-```bash
-# Port forward to Temporal Web UI
-kubectl port-forward svc/postiz-app-temporal-web 8080:8080
-
-# Use Temporal CLI to export workflow history
-temporal workflow list --address localhost:7233
-temporal workflow describe --address localhost:7233 --workflow-id {workflow-id}
-```
-
-### Step 2: Deploy Standalone Temporal
-
-```bash
-helm install temporal temporalio/temporal \
-  --namespace temporal \
-  --create-namespace \
-  --values examples/temporal-migration.yaml
-```
-
-### Step 3: Migrate Database (if preserving data)
-
-The migration example values file configures Temporal to use the existing databases:
-- Database: `temporal`
-- Visibility Database: `temporal_visibility`
-
-```bash
-# Verify databases are accessible from new Temporal instance
-kubectl exec -it -n temporal temporal-postgresql-0 -- psql -U postiz -d temporal -c "SELECT * FROM schema_version;"
-```
-
-### Step 4: Update Postiz Release
-
-```bash
-# Upgrade to v1.1.0 with external Temporal address
-helm upgrade postiz-app oci://ghcr.io/gitroomhq/postiz-helmchart/charts/postiz-app \
-  --set env.TEMPORAL_ADDRESS="temporal-frontend.temporal.svc.cluster.local:7233" \
-  --reuse-values
-```
-
-### Step 5: Verify Connection
-
-```bash
-# Check Postiz logs
-kubectl logs -l app.kubernetes.io/name=postiz-app --tail=50
-
-# Should see successful Temporal connection
-```
-
-### Step 6: Clean Up Old Temporal (Optional)
-
-Once verified, you can remove the old embedded Temporal resources:
-
-```bash
-# List old Temporal resources
-kubectl get all -l app.kubernetes.io/name=postiz-app | grep temporal
-
-# Delete old Temporal deployment (if needed)
-# kubectl delete deployment postiz-app-temporal-server --cascade=orphan
-```
-
-**⚠️ Warning**: Do not delete the PostgreSQL databases (`temporal` and `temporal_visibility`) until you've fully validated the new Temporal instance.
-
 ## Upgrading
 
 ### To 1.1.0

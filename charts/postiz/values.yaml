@@ -134,7 +134,7 @@ redis:
   enabled: true
   auth:
     password: postiz-redis-password
-  master:
+  primary:
     service:
       ports:
         redis: 6379
@@ -187,7 +187,7 @@ secrets:
 
   # Core Infrastructure (auto-generated if dependencies enabled)
   DATABASE_URL: "" # PostgreSQL connection string
-  # REDIS_URL: "" # Redis/Valkey connection string
+  REDIS_URL: "" # Redis/Valkey connection string
   JWT_SECRET: "" # JWT authentication secret
 
   # Social Media API Keys - X/Twitter

@@ -190,7 +190,6 @@ temporal:
 secrets:
   autoGenerate:
     enabled: true
-  JWT_SECRET: "{{ .Values.secrets.jwtSecret }}"  # From external source
 
 podAnnotations:
   reloader.stakater.com/auto: "true"
