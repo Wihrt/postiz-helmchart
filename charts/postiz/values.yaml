@@ -118,11 +118,12 @@ tolerations: []
 affinity: {}
 
 # PostgreSQL configuration
+# IMPORTANT: Change auth.password for production deployments
 postgresql:
   enabled: true
   auth:
     username: postiz
-    password: postiz-password
+    password: postiz-password  # Change this for production!
     database: postiz
   service:
     ports:
@@ -130,10 +131,11 @@ postgresql:
 
 # Redis/Valkey configuration
 # Note: As of v1.1.0, uses Valkey (Redis fork) for Redis-compatible caching
+# IMPORTANT: Change auth.password for production deployments
 redis:
   enabled: true
   auth:
-    password: postiz-redis-password
+    password: postiz-redis-password  # Change this for production!
   primary:
     service:
       ports:

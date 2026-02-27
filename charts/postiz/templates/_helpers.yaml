@@ -98,7 +98,7 @@ Generate Redis/Valkey connection URL with properly encoded credentials
 {{- if .Values.redis.enabled -}}
 {{- $password := .Values.redis.auth.password | urlquery -}}
 {{- $host := include "postiz.redisHost" . -}}
-{{- $port := .Values.redis.master.service.ports.redis | default 6379 -}}
+{{- $port := .Values.redis.primary.service.ports.redis | default 6379 -}}
 {{- if $password -}}
 {{- printf "redis://default:%s@%s:%d" $password $host ($port | int) -}}
 {{- else -}}
