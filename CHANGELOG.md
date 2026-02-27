@@ -68,6 +68,15 @@ For users upgrading to v1.1.0:
 ### Changed
 - Improved default volume configuration
 
+## [1.0.3] - 2024
+
+### Added
+- **Autoscaling Support**: Added Horizontal Pod Autoscaler (HPA) configuration via `autoscaling` values
+- Node selector, tolerations, and affinity configuration support
+
+### Changed
+- Improved deployment configuration for better Kubernetes scheduling control
+
 ## [1.0.2] - 2024
 
 ### Added

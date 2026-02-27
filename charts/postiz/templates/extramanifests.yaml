@@ -3,8 +3,8 @@
 ---
 {{- end }}
 {{- if typeIs "string" $manifest }}
-{{ $manifest }}
+{{ $manifest | trim }}
 {{- else }}
-{{ toYaml $manifest }}
+{{ toYaml $manifest | trim }}
 {{- end }}
 {{- end }}

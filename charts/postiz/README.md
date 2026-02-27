@@ -26,7 +26,7 @@ This chart bootstraps a [Postiz](https://postiz.com) deployment on a Kubernetes 
 
 - Kubernetes 1.19+
 - Helm 3.8+
-- PV provisioner support in the underlying infrastructure (for PostgreSQL/Redis persistence)
+- PV provisioner support in the underlying infrastructure (for PostgreSQL/Valkey persistence)
 
 ## Installing the Chart
 
@@ -108,11 +108,11 @@ helm install postiz oci://ghcr.io/gitroomhq/postiz-helmchart/charts/postiz-app -
 
 ### Temporal Workflow Engine
 
-| Parameter                      | Description              | Default |
-| ------------------------------ | ------------------------ | ------- |
-| `temporal.enabled`             | Deploy Temporal          | `true`  |
-| `temporal.server.replicaCount` | Temporal server replicas | `1`     |
-| `temporal.web.enabled`         | Deploy Temporal Web UI   | `true`  |
+Temporal is required and must be deployed separately. Configure the address via `env.TEMPORAL_ADDRESS`.
+
+| Parameter              | Description                              | Default |
+| ---------------------- | ---------------------------------------- | ------- |
+| `env.TEMPORAL_ADDRESS` | **REQUIRED** Temporal frontend address   | `""`    |
 
 ### Secrets & Auto-Generation
 
@@ -175,17 +175,9 @@ postgresql:
       memory: "256Mi"
       cpu: "250m"
 
-temporal:
-  enabled: true
-  server:
-    replicaCount: 3
-    config:
-      persistence:
-        numHistoryShards: 512
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "500m"
+env:
+  # REQUIRED: Configure your Temporal deployment address
+  TEMPORAL_ADDRESS: "temporal-frontend.temporal.svc.cluster.local:7233"
 
 secrets:
   autoGenerate:
@@ -234,31 +226,13 @@ secrets:
 
 ### Temporal with External Database
 
-```yaml
-temporal:
-  enabled: true
-  server:
-    config:
-      persistence:
-        datastores:
-          default:
-            sql:
-              pluginName: postgres12
-              host: "temporal-db.example.com"
-              port: 5432
-              user: "temporal"
-              password: "temporal-password"
-              databaseName: "temporal"
-              maxConns: 20
-              maxIdleConns: 5
-          visibility:
-            sql:
-              pluginName: postgres12
-              host: "temporal-db.example.com"
-              port: 5432
-              user: "temporal"
-              password: "temporal-password"
-              databaseName: "temporal_visibility"
+Temporal is deployed separately from this chart. To configure Temporal to use an external database, use the [temporal-self-hosted.yaml](../../examples/temporal-self-hosted.yaml) example as a reference when installing the `temporalio/temporal` chart:
+
+```bash
+helm install temporal temporalio/temporal \
+  --namespace temporal \
+  --create-namespace \
+  --values examples/temporal-self-hosted.yaml
 ```
 
 ### External Secrets with Vault

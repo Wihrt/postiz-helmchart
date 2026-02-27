@@ -293,7 +293,7 @@ This guide explains how to deploy Temporal in the same Kubernetes cluster for us
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │         Temporal Namespace (temporal)            │
 ├─────────────────────────────────────────────────┤
@@ -510,7 +510,7 @@ helm upgrade postiz-app oci://ghcr.io/gitroomhq/postiz-helmchart/charts/postiz-a
   --reuse-values
 ```
 
-See [Migration from v1.1.0](#migration-from-v110-embedded-temporal) for detailed upgrade instructions.
+See [Migration from v1.1.0](#to-110) for detailed upgrade instructions.
 
 ### To 1.0.0
 
